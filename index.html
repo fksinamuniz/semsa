@@ -68,7 +68,7 @@
                             <span class="ml-2">Voz</span>
                         </label>
                         <select id="voice-select" class="w-full bg-slate-700 border border-slate-600 rounded-md py-2 px-3 text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
-                            <option>Carregando voz masculina...</option>
+                            <option>Carregando vozes...</option>
                         </select>
                     </div>
 
@@ -174,39 +174,19 @@
                 }
             }
 
+            // Popula apenas vozes pt-BR, qualquer gênero, para máxima compatibilidade
             function populateVoiceList() {
                 voices = synth.getVoices();
-                // Filtrar apenas vozes pt-BR masculinas
-                const ptBRMaleVoices = voices.filter(voice =>
-                    voice.lang === 'pt-BR' &&
-                    (voice.name.toLowerCase().includes('male') ||
-                     voice.name.toLowerCase().includes('masc') ||
-                     voice.name.toLowerCase().includes('brasil') ||
-                     voice.name.toLowerCase().includes('pt-br') ||
-                     voice.name.toLowerCase().includes('man') ||
-                     voice.name.toLowerCase().includes('m') ||
-                     voice.gender === "male")
-                );
+                let ptBRVoices = voices.filter(voice => voice.lang && voice.lang.toLowerCase().startsWith('pt-br'));
+                let finalVoices = ptBRVoices.length ? ptBRVoices : voices;
                 voiceSelect.innerHTML = '';
-                if (ptBRMaleVoices.length === 0) {
-                    // fallback: mostra todas pt-BR
-                    const ptBRVoices = voices.filter(voice => voice.lang === 'pt-BR');
-                    ptBRVoices.forEach((voice, i) => {
-                        const option = document.createElement('option');
-                        option.textContent = `${voice.name} (${voice.lang})`;
-                        option.setAttribute('data-lang', voice.lang);
-                        option.setAttribute('data-name', voice.name);
-                        voiceSelect.appendChild(option);
-                    });
-                } else {
-                    ptBRMaleVoices.forEach((voice, i) => {
-                        const option = document.createElement('option');
-                        option.textContent = `${voice.name} (${voice.lang})`;
-                        option.setAttribute('data-lang', voice.lang);
-                        option.setAttribute('data-name', voice.name);
-                        voiceSelect.appendChild(option);
-                    });
-                }
+                finalVoices.forEach(voice => {
+                    const option = document.createElement('option');
+                    option.textContent = `${voice.name} (${voice.lang})`;
+                    option.setAttribute('data-lang', voice.lang);
+                    option.setAttribute('data-name', voice.name);
+                    voiceSelect.appendChild(option);
+                });
                 voiceSelect.selectedIndex = 0;
                 voiceSelect.disabled = false;
             }
@@ -218,38 +198,10 @@
                 }
                 if (textInput.value.trim() !== '') {
                     const utterance = new SpeechSynthesisUtterance(textInput.value);
-                    
-                    utterance.onstart = () => {
-                        status = 'speaking';
-                        updateUI();
-                    };
-
-                    utterance.onpause = () => {
-                        status = 'paused';
-                        updateUI();
-                    };
-                    
-                    utterance.onresume = () => {
-                        status = 'speaking';
-                        updateUI();
-                    };
-
-                    utterance.onend = () => {
-                        status = 'idle';
-                        updateUI();
-                    };
-                    
-                    utterance.onerror = (event) => {
-                        console.error('SpeechSynthesisUtterance.onerror', event);
-                        status = 'idle';
-                        updateUI();
-                    };
-
-                    const selectedOption = voiceSelect.selectedOptions[0].getAttribute('data-name');
+                    const selectedOption = voiceSelect.selectedOptions[0]?.getAttribute('data-name');
                     utterance.voice = voices.find(voice => voice.name === selectedOption);
                     utterance.pitch = pitchInput.value;
                     utterance.rate = rateInput.value;
-                    
                     synth.speak(utterance);
                 }
             }
@@ -270,7 +222,6 @@
                 synth.cancel();
             }
 
-            // Event Listeners
             speakButton.addEventListener('click', () => {
                 if (status === 'paused') {
                     resume();

@@ -39,7 +39,7 @@
     <header class="bg-slate-800/50 backdrop-blur-sm border-b border-slate-700 shadow-md sticky top-0 z-10">
         <div class="container mx-auto px-4 py-3 flex items-center justify-center">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 1[...]
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 1[...]"/>
             </svg>
             <h1 class="ml-3 text-2xl font-bold tracking-tight text-slate-100">
                 Sintetizador de Texto para Voz
@@ -64,12 +64,12 @@
                     <div class="space-y-2">
                         <label for="voice-select" class="flex items-center text-sm font-medium text-slate-300">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20[...]
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20[...]"/>
                             </svg>
                             <span class="ml-2">Voz</span>
                         </label>
-                        <select id="voice-select" disabled class="w-full bg-slate-700 border border-slate-600 rounded-md py-2 px-3 text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 tra[...]
-                            <option>Carregando vozes...</option>
+                        <select id="voice-select" class="w-full bg-slate-700 border border-slate-600 rounded-md py-2 px-3 text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                            <option>Carregando voz masculina...</option>
                         </select>
                     </div>
 
@@ -77,7 +77,7 @@
                     <div class="space-y-2">
                         <label for="pitch" class="flex items-center text-sm font-medium text-slate-300">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-[...]
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-[...]"/>
                             </svg>
                             <span class="ml-2">Tom: <span id="pitch-value">1.0</span></span>
                         </label>
@@ -88,7 +88,7 @@
                     <div class="space-y-2">
                         <label for="rate" class="flex items-center text-sm font-medium text-slate-300">
                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M13 5l7 7-7 7M5 5l7 7-7 7" />
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M13 5l7 7-7 7M5 5l7 7-7 7"/>
                             </svg>
                            <span class="ml-2">Velocidade: <span id="rate-value">0.9</span></span>
                         </label>
@@ -177,21 +177,38 @@
 
             function populateVoiceList() {
                 voices = synth.getVoices();
-                const selectedIndex = voiceSelect.selectedIndex < 0 ? 0 : voiceSelect.selectedIndex;
+                // Filtrar apenas vozes pt-BR masculinas
+                const ptBRMaleVoices = voices.filter(voice =>
+                    voice.lang === 'pt-BR' &&
+                    (voice.name.toLowerCase().includes('male') ||
+                     voice.name.toLowerCase().includes('masc') ||
+                     voice.name.toLowerCase().includes('brasil') ||
+                     voice.name.toLowerCase().includes('pt-br') ||
+                     voice.name.toLowerCase().includes('man') ||
+                     voice.name.toLowerCase().includes('m') ||
+                     voice.gender === "male")
+                );
                 voiceSelect.innerHTML = '';
-                
-                let defaultVoiceIndex = voices.findIndex(voice => voice.lang.includes('pt-BR'));
-                if (defaultVoiceIndex === -1) defaultVoiceIndex = 0;
-
-                voices.forEach((voice, i) => {
-                    const option = document.createElement('option');
-                    option.textContent = `${voice.name} (${voice.lang})`;
-                    option.setAttribute('data-lang', voice.lang);
-                    option.setAttribute('data-name', voice.name);
-                    voiceSelect.appendChild(option);
-                });
-
-                voiceSelect.selectedIndex = selectedIndex || defaultVoiceIndex;
+                if (ptBRMaleVoices.length === 0) {
+                    // fallback: mostra todas pt-BR
+                    const ptBRVoices = voices.filter(voice => voice.lang === 'pt-BR');
+                    ptBRVoices.forEach((voice, i) => {
+                        const option = document.createElement('option');
+                        option.textContent = `${voice.name} (${voice.lang})`;
+                        option.setAttribute('data-lang', voice.lang);
+                        option.setAttribute('data-name', voice.name);
+                        voiceSelect.appendChild(option);
+                    });
+                } else {
+                    ptBRMaleVoices.forEach((voice, i) => {
+                        const option = document.createElement('option');
+                        option.textContent = `${voice.name} (${voice.lang})`;
+                        option.setAttribute('data-lang', voice.lang);
+                        option.setAttribute('data-name', voice.name);
+                        voiceSelect.appendChild(option);
+                    });
+                }
+                voiceSelect.selectedIndex = 0;
                 voiceSelect.disabled = false;
             }
 
@@ -274,7 +291,7 @@
                 rateValue.textContent = parseFloat(rateInput.value).toFixed(1);
             });
             
-            // Initialize
+            // Inicializar
             populateVoiceList();
             if (synth.onvoiceschanged !== undefined) {
                 synth.onvoiceschanged = populateVoiceList;

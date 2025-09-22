@@ -3,302 +3,434 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Painel de Monitoramento de Indicadores de Saúde - Parauapebas</title>
-    <!-- Tailwind CSS para estilização rápida e responsiva -->
+    <title>Painel de Saúde - Parauapebas/PA</title>
+    <!-- Incluindo Tailwind CSS para um design moderno e responsivo -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Chart.js para criar gráficos dinâmicos -->
+    <!-- Incluindo a biblioteca Chart.js para os gráficos -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- Google Fonts: Inter -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* Estilo base para a página e para a fonte Inter */
+        /* Estilo customizado para um visual mais profissional */
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #111827; /* Fundo escuro (cinza do Tailwind) */
-            color: #f3f4f6; /* Texto claro */
         }
-        /* Estilo para a aba ativa */
-        .tab-active {
-            border-bottom-color: #3b82f6;
-            color: #ffffff;
+        @import url('https://rsms.me/inter/inter.css');
+        .chart-container {
+            position: relative;
+            height: 350px;
+            width: 100%;
         }
-        /* Estilo para abas inativas */
-        .tab-inactive {
-            border-bottom-color: transparent;
-            color: #9ca3af;
+        /* Estilos para abas de navegação */
+        .tab-link {
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .tab-link.active {
+            border-bottom-color: #3B82F6; /* blue-500 */
+            color: #3B82F6;
+            font-weight: 600;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
         }
     </style>
 </head>
-<body class="antialiased">
+<body class="bg-gray-100 text-gray-800">
 
-    <div class="container mx-auto p-4 md:p-8">
-        <!-- Cabeçalho do Painel -->
-        <header class="mb-4 flex items-center space-x-4">
-            <img src="data:image/png;base64,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" alt="Logo da Prefeitura de Parauapebas" class="h-20 w-auto">
-            <div>
-                <h1 class="text-3xl font-bold text-white">Painel de Monitoramento de Indicadores de Saúde - Parauapebas</h1>
-                <p class="text-gray-400 mt-1">Visão geral dos dados de saúde do município.</p>
+    <!-- Cabeçalho Principal -->
+    <header class="bg-white shadow-md">
+        <div class="container mx-auto px-6 py-4">
+            <h1 class="text-3xl font-bold text-gray-700">Painel de Saúde Pública</h1>
+            <p class="text-lg text-gray-500">Município de Parauapebas - PA</p>
+        </div>
+    </header>
+
+    <!-- Navegação por Abas -->
+    <nav class="bg-white shadow-sm">
+        <div class="container mx-auto flex overflow-x-auto">
+            <button class="tab-link py-4 px-6 border-b-2 border-transparent text-gray-500 hover:text-blue-500 focus:outline-none active flex-shrink-0" data-tab="visao-geral">Visão Geral</button>
+            <button class="tab-link py-4 px-6 border-b-2 border-transparent text-gray-500 hover:text-blue-500 focus:outline-none flex-shrink-0" data-tab="atencao-primaria">Atenção Primária</button>
+            <button class="tab-link py-4 px-6 border-b-2 border-transparent text-gray-500 hover:text-blue-500 focus:outline-none flex-shrink-0" data-tab="atencao-especializada">Atenção Especializada</button>
+            <button class="tab-link py-4 px-6 border-b-2 border-transparent text-gray-500 hover:text-blue-500 focus:outline-none flex-shrink-0" data-tab="redes-integracao">Redes / Integração</button>
+        </div>
+    </nav>
+
+
+    <!-- Conteúdo Principal do Dashboard -->
+    <main class="container mx-auto px-6 py-8">
+
+        <!-- Aba: Visão Geral -->
+        <div id="visao-geral" class="tab-content active">
+            <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-8">
+                <!-- Coluna de Resumo (Sidebar Falsa) -->
+                <div class="md:col-span-1 lg:col-span-1">
+                    <div class="bg-white p-6 rounded-lg shadow-lg">
+                        <h2 class="text-xl font-bold mb-4 border-b pb-2">Resumo do Município</h2>
+                        <div class="space-y-4">
+                            <div>
+                                <p class="font-semibold">População (2024)</p>
+                                <p class="text-2xl text-blue-600">298.854</p>
+                                <p class="text-sm text-gray-500">50% Mulheres, 50% Homens</p>
+                            </div>
+                             <div>
+                                <p class="font-semibold">Domicílios</p>
+                                <p class="text-2xl text-blue-600">104.820</p>
+                            </div>
+                            <div>
+                                <p class="font-semibold">Transferências ao Município (2025)</p>
+                                <p class="text-2xl text-green-600">R$ 742,51 Mi</p>
+                            </div>
+                             <div>
+                                <p class="font-semibold">Programa Bolsa Família (2025)</p>
+                                <p class="text-2xl text-green-600">R$ 129,22 Mi</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Coluna Principal com Gráficos -->
+                <div class="md:col-span-2 lg:col-span-3">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                        <div class="bg-white p-6 rounded-lg shadow-lg"><h3 class="text-lg font-bold mb-4">Pirâmide Etária - 2024</h3><div class="chart-container"><canvas id="piramideEtariaChart"></canvas></div></div>
+                        <div class="bg-white p-6 rounded-lg shadow-lg"><h3 class="text-lg font-bold mb-4">Nascidos Vivos por Ano</h3><div class="chart-container"><canvas id="nascidosVivosChart"></canvas></div></div>
+                        <div class="bg-white p-6 rounded-lg shadow-lg"><h3 class="text-lg font-bold mb-4">Óbitos Infantis por Ano</h3><div class="chart-container"><canvas id="mortalidadeInfantilChart"></canvas></div></div>
+                        <div class="bg-white p-6 rounded-lg shadow-lg"><h3 class="text-lg font-bold mb-4">Óbitos Maternos por Ano</h3><div class="chart-container"><canvas id="obitosMaternosChart"></canvas></div></div>
+                        <div class="bg-white p-6 rounded-lg shadow-lg lg:col-span-2"><h3 class="text-lg font-bold mb-4">Principais Causas de Internação (2022)</h3><div class="chart-container"><canvas id="internacoesChart"></canvas></div></div>
+                        <div class="bg-white p-6 rounded-lg shadow-lg lg:col-span-2"><h3 class="text-lg font-bold mb-4">Principais Causas de Óbito (2022)</h3><div class="chart-container"><canvas id="mortalidadeGeralChart"></canvas></div></div>
+                    </div>
+                </div>
             </div>
-        </header>
-
-        <!-- Navegação por Abas -->
-        <div class="border-b border-gray-700 mb-8 overflow-x-auto">
-            <nav class="-mb-px flex space-x-6" aria-label="Tabs">
-                <button onclick="changeTab(event, 'visaoGeral')" class="tab-active whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">Visão Geral</button>
-                <button onclick="changeTab(event, 'maternoInfantil')" class="tab-inactive hover:text-gray-300 hover:border-gray-500 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">Saúde Materno-Infantil</button>
-                <button onclick="changeTab(event, 'morbidade')" class="tab-inactive hover:text-gray-300 hover:border-gray-500 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">Morbidade</button>
-                <button onclick="changeTab(event, 'mortalidade')" class="tab-inactive hover:text-gray-300 hover:border-gray-500 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">Mortalidade</button>
-                <button onclick="changeTab(event, 'notificacao')" class="tab-inactive hover:text-gray-300 hover:border-gray-500 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">Doenças de Notificação</button>
-                <button onclick="changeTab(event, 'atencaoPrimaria')" class="tab-inactive hover:text-gray-300 hover:border-gray-500 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">Atenção Primária</button>
-            </nav>
         </div>
 
-        <!-- Conteúdo das Abas -->
-        <main>
-            <!-- Aba: Visão Geral -->
-            <div id="visaoGeral" class="tab-content">
-                <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                    <!-- Card de Nascidos Vivos -->
-                    <div class="bg-gray-800 rounded-lg shadow-lg p-6 flex flex-col justify-between hover:bg-gray-700 transition-colors duration-300">
-                        <div>
-                            <div class="flex items-center justify-between">
-                                <p class="text-sm font-medium text-gray-400">Nascidos Vivos (2023)</p>
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
+        <!-- Aba: Atenção Primária -->
+        <div id="atencao-primaria" class="tab-content">
+            <h2 class="text-2xl font-bold mb-6">Atenção Primária à Saúde (APS)</h2>
+            <div class="grid grid-cols-1 gap-8">
+                <div class="bg-white p-6 rounded-lg shadow-lg">
+                    <h3 class="text-lg font-bold mb-4">Financiamento da APS (e-Gestor - Q2 2022)</h3>
+                    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 text-center">
+                        <div class="bg-blue-50 p-4 rounded-lg"><h4 class="font-semibold text-gray-600">Nota Desempenho</h4><p class="text-3xl font-bold text-blue-600">6,00</p></div>
+                        <div class="bg-blue-50 p-4 rounded-lg"><h4 class="font-semibold text-gray-600">População Cadastrada</h4><p class="text-3xl font-bold text-blue-600">260.672</p></div>
+                        <div class="bg-green-50 p-4 rounded-lg"><h4 class="font-semibold text-gray-600">Pag. por Desempenho</h4><p class="text-3xl font-bold text-green-700">R$ 1,05 Mi</p></div>
+                        <div class="bg-green-50 p-4 rounded-lg"><h4 class="font-semibold text-gray-600">Ações Estratégicas</h4><p class="text-3xl font-bold text-green-700">R$ 511 mil</p></div>
+                        <div class="bg-green-50 p-4 rounded-lg col-span-2 lg:col-span-1"><h4 class="font-semibold text-gray-600">Custeio Total (Quad.)</h4><p class="text-3xl font-bold text-green-700">R$ 5,38 Mi</p></div>
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 rounded-lg shadow-lg">
+                    <h3 class="text-lg font-bold mb-4">Indicadores de Desempenho (Previne Brasil - 2022)</h3>
+                    <div class="chart-container" style="height:500px;">
+                        <canvas id="previneBrasilChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                     <div class="bg-white p-6 rounded-lg shadow-lg">
+                        <h3 class="text-lg font-bold mb-4">Campanha de Vacinação Escolar (Jan-Set 2025)</h3>
+                        <p class="text-sm text-gray-500 mb-4">Total de doses aplicadas no período: <strong class="text-xl text-gray-700">819</strong></p>
+                        <div class="chart-container">
+                            <canvas id="vacinacaoEscolarChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-lg">
+                        <h3 class="text-lg font-bold mb-4">Vacinação Dupla Viral (6 a 11 meses) - 2025</h3>
+                         <div class="grid grid-cols-2 gap-4 text-center mb-4">
+                            <div class="bg-gray-100 p-2 rounded-lg"><h4 class="font-semibold text-sm text-gray-600">População Alvo</h4><p class="text-2xl font-bold text-gray-800">2.300</p></div>
+                            <div class="bg-blue-50 p-2 rounded-lg"><h4 class="font-semibold text-sm text-gray-600">Doses Aplicadas</h4><p class="text-2xl font-bold text-blue-600">499</p></div>
+                         </div>
+                        <div class="chart-container" style="height: 290px;">
+                            <canvas id="duplaViralChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Aba: Atenção Especializada (MAC) -->
+        <div id="atencao-especializada" class="tab-content">
+             <h2 class="text-2xl font-bold mb-6">Média e Alta Complexidade (MAC)</h2>
+             <div class="grid grid-cols-1 gap-8 mb-8">
+                 <div class="bg-white p-6 rounded-lg shadow-lg">
+                     <h3 class="text-lg font-bold mb-4">Financiamento Federal MAC (Acumulado 2024 - Ago)</h3>
+                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+                         <div class="bg-indigo-50 p-4 rounded-lg"><h4 class="font-semibold text-gray-600">Teto MAC - Gestão Estadual</h4><p class="text-3xl font-bold text-indigo-600">R$ 10,75 Mi</p></div>
+                         <div class="bg-indigo-50 p-4 rounded-lg"><h4 class="font-semibold text-gray-600">Incentivo FAEC</h4><p class="text-3xl font-bold text-indigo-600">R$ 2,31 Mi</p></div>
+                         <div class="bg-green-50 p-4 rounded-lg"><h4 class="font-semibold text-gray-600">Total Transferido</h4><p class="text-3xl font-bold text-green-700">R$ 13,05 Mi</p></div>
+                     </div>
+                 </div>
+             </div>
+             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div class="bg-white p-6 rounded-lg shadow-lg">
+                    <h3 class="text-lg font-bold mb-4">Produção Ambulatorial Especializada (2022)</h3>
+                    <div class="chart-container">
+                        <canvas id="producaoAmbulatorialChart"></canvas>
+                    </div>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-lg">
+                    <h3 class="text-lg font-bold mb-4">Principais Procedimentos e Exames (2022)</h3>
+                    <div class="chart-container">
+                        <canvas id="procedimentosExamesChart"></canvas>
+                    </div>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-lg lg:col-span-2">
+                    <h3 class="text-lg font-bold mb-4">Óbitos por Causas Externas (Violência e Acidentes) - 2022</h3>
+                    <div class="chart-container" style="height:400px;">
+                        <canvas id="causasExternasChart"></canvas>
+                    </div>
+                </div>
+             </div>
+        </div>
+
+        <!-- Aba: Redes de Atenção / Integração -->
+        <div id="redes-integracao" class="tab-content">
+            <h2 class="text-2xl font-bold mb-6">Redes de Atenção e Integração</h2>
+            <div class="grid grid-cols-1 gap-8">
+                <!-- Vigilância em Saúde -->
+                <div class="bg-white p-6 rounded-lg shadow-lg">
+                    <h3 class="text-lg font-bold mb-4">Vigilância em Saúde (Dados de 2024)</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        <!-- Assistência Farmacêutica -->
+                        <div class="bg-gray-50 p-4 rounded-lg border-l-4 border-teal-500">
+                            <h4 class="font-bold text-md text-teal-700 mb-2">Assistência Farmacêutica</h4>
+                            <div class="space-y-2 text-sm">
+                                <p><strong class="text-xl">17</strong> Unidades com Dispensação</p>
+                                <p><strong class="text-xl">70%</strong> Abastecimento Médio</p>
+                                <p><strong class="text-xl">56.7%</strong> Cobertura populacional</p>
                             </div>
-                            <p class="text-3xl font-bold text-white mt-2">4.821</p>
                         </div>
-                        <div class="flex items-center mt-4 text-sm text-red-500">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" /></svg>
-                            <span>-3.9% vs. Ano Anterior</span>
-                        </div>
-                    </div>
-                    <!-- Card de Óbitos Infantis -->
-                    <div class="bg-gray-800 rounded-lg shadow-lg p-6 flex flex-col justify-between hover:bg-gray-700 transition-colors duration-300">
-                        <div>
-                            <div class="flex items-center justify-between">
-                                <p class="text-sm font-medium text-gray-400">Óbitos Infantis (2023)</p>
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>
+                        <!-- Vigilância Sanitária -->
+                        <div class="bg-gray-50 p-4 rounded-lg border-l-4 border-cyan-500">
+                            <h4 class="font-bold text-md text-cyan-700 mb-2">Vigilância Sanitária</h4>
+                            <div class="space-y-2 text-sm">
+                                <p><strong class="text-xl">1.091</strong> Inspeções Realizadas</p>
+                                <p><strong class="text-xl">981</strong> Licenças Emitidas</p>
+                                <p><strong class="text-xl">38</strong> Ações Educativas</p>
                             </div>
-                            <p class="text-3xl font-bold text-white mt-2">61</p>
                         </div>
-                        <div class="flex items-center mt-4 text-sm text-red-500">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18" /></svg>
-                            <span>+5.2% vs. Ano Anterior</span>
-                        </div>
-                    </div>
-                    <!-- Card de Óbitos Maternos -->
-                    <div class="bg-gray-800 rounded-lg shadow-lg p-6 flex flex-col justify-between hover:bg-gray-700 transition-colors duration-300">
-                        <div>
-                            <div class="flex items-center justify-between">
-                                <p class="text-sm font-medium text-gray-400">Óbitos Maternos (2022)</p>
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-yellow-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M15 21v-2a6 6 0 00-12 0v2" /></svg>
+                        <!-- Vigilância Ambiental -->
+                        <div class="bg-gray-50 p-4 rounded-lg border-l-4 border-lime-500">
+                            <h4 class="font-bold text-md text-lime-700 mb-2">Vigilância Ambiental</h4>
+                            <div class="space-y-2 text-sm">
+                                <p><strong class="text-xl">48.053</strong> Imóveis Visitados (LIRAa)</p>
+                                <p><strong class="text-xl">712</strong> Amostras de Água Analisadas</p>
                             </div>
-                            <p class="text-3xl font-bold text-white mt-2">5</p>
                         </div>
-                        <div class="flex items-center mt-4 text-sm text-green-500">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" /></svg>
-                            <span>-28.6% vs. Ano Anterior</span>
-                        </div>
-                    </div>
-                    <!-- Card de Internações -->
-                    <div class="bg-gray-800 rounded-lg shadow-lg p-6 flex flex-col justify-between hover:bg-gray-700 transition-colors duration-300">
-                        <div>
-                            <div class="flex items-center justify-between">
-                                <p class="text-sm font-medium text-gray-400">Total de Internações (2022)</p>
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-purple-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
+                        <!-- Vigilância Epidemiológica -->
+                        <div class="bg-gray-50 p-4 rounded-lg border-l-4 border-amber-500">
+                            <h4 class="font-bold text-md text-amber-700 mb-2">Vigilância Epidemiológica</h4>
+                            <div class="space-y-2 text-sm">
+                                <p><strong class="text-xl">2.508</strong> Casos Notificados</p>
+                                <p><strong class="text-xl">4</strong> Surtos Investigados</p>
                             </div>
-                            <p class="text-3xl font-bold text-white mt-2">10.645</p>
-                        </div>
-                        <div class="flex items-center mt-4 text-sm text-red-500">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18" /></svg>
-                            <span>+5.8% vs. Ano Anterior</span>
                         </div>
                     </div>
-                </section>
-                <section class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <div class="lg:col-span-3 bg-gray-800 rounded-lg shadow-lg p-6">
-                        <h2 class="text-lg font-semibold text-white mb-4">Principais Grupos de Causas de Óbito (2022)</h2>
-                        <canvas id="mortalityCausesChart"></canvas>
-                    </div>
-                </section>
-            </div>
+                </div>
 
-            <!-- Aba: Saúde Materno-Infantil -->
-            <div id="maternoInfantil" class="tab-content hidden">
-                 <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <div class="bg-gray-800 rounded-lg shadow-lg p-6">
-                        <h2 class="text-lg font-semibold text-white mb-4">Nascimentos por Mês (2023)</h2>
-                        <canvas id="birthsChart"></canvas>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <!-- Saúde Mental -->
+                    <div class="bg-white p-6 rounded-lg shadow-lg">
+                        <h3 class="text-lg font-bold mb-4">Atendimentos na RAPS (CAPS) - 2022</h3>
+                        <div class="chart-container" style="height: 250px;">
+                            <canvas id="atendimentosCapsChart"></canvas>
+                        </div>
                     </div>
-                    <div class="bg-gray-800 rounded-lg shadow-lg p-6">
-                        <h2 class="text-lg font-semibold text-white mb-4">Causas Evitáveis de Óbito Infantil (2022)</h2>
-                        <canvas id="infantDeathsChart"></canvas>
+                    <div class="bg-white p-6 rounded-lg shadow-lg">
+                        <h3 class="text-lg font-bold mb-4">Internações por Transtornos Mentais</h3>
+                        <div class="chart-container" style="height: 250px;">
+                            <canvas id="saudeMentalChart"></canvas>
+                        </div>
                     </div>
-                    <div class="bg-gray-800 rounded-lg shadow-lg p-6">
-                        <h2 class="text-lg font-semibold text-white mb-4">Evolução dos Óbitos Maternos</h2>
-                        <canvas id="maternalDeathsChart"></canvas>
+                    <!-- Rede Cegonha -->
+                    <div class="bg-white p-6 rounded-lg shadow-lg">
+                        <h3 class="text-lg font-bold mb-4">Rede Cegonha: Tipo de Parto (2021)</h3>
+                        <div class="chart-container" style="height: 250px;">
+                            <canvas id="tipoPartoChart"></canvas>
+                        </div>
                     </div>
-                     <div class="bg-gray-800 rounded-lg shadow-lg p-6">
-                        <h2 class="text-lg font-semibold text-white mb-4">Casos de Anomalias Congênitas</h2>
-                        <canvas id="anomaliesChart"></canvas>
-                    </div>
-                </section>
-            </div>
 
-            <!-- Aba: Morbidade -->
-            <div id="morbidade" class="tab-content hidden">
-                 <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <div class="bg-gray-800 rounded-lg shadow-lg p-6">
-                        <h2 class="text-lg font-semibold text-white mb-4">Principais Causas de Internação (2022)</h2>
-                        <canvas id="hospitalizationCausesChart"></canvas>
+                    <!-- Saúde Bucal -->
+                    <div class="bg-white p-6 rounded-lg shadow-lg lg:col-span-3">
+                        <h3 class="text-lg font-bold mb-4">Saúde Bucal: Produção Anual</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <div>
+                                <h4 class="text-md font-semibold text-center mb-2">Procedimentos Básicos (2022) - Total: 304.818</h4>
+                                <div class="chart-container" style="height: 250px;">
+                                    <canvas id="saudeBucalBasicoChart"></canvas>
+                                </div>
+                            </div>
+                            <div>
+                                <h4 class="text-md font-semibold text-center mb-2">Procedimentos Especializados (2022) - Total: 6.439</h4>
+                                <div class="chart-container" style="height: 250px;">
+                                    <canvas id="saudeBucalEspecializadoChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Placeholder para dados futuros -->
+                        <div class="mt-8 pt-4 border-t border-gray-200">
+                            <h3 class="text-lg font-bold mb-2 text-gray-700">Produção (2024-2025)</h3>
+                            <div class="bg-gray-50 p-4 rounded-lg text-center">
+                                <p class="text-gray-500">Aguardando a disponibilização dos dados de Saúde Bucal para os anos de 2024 e 2025. A visualização será adicionada assim que os dados estiverem disponíveis.</p>
+                            </div>
+                        </div>
                     </div>
-                    <div class="bg-gray-800 rounded-lg shadow-lg p-6">
-                        <h2 class="text-lg font-semibold text-white mb-4">Internações por Sexo (2023)</h2>
-                        <canvas id="hospitalizationByGenderChart"></canvas>
-                    </div>
-                </section>
-            </div>
 
-            <!-- Aba: Mortalidade -->
-            <div id="mortalidade" class="tab-content hidden">
-                 <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                     <div class="bg-gray-800 rounded-lg shadow-lg p-6">
-                        <h2 class="text-lg font-semibold text-white mb-4">Evolução da Mortalidade Prematura (30 a 69 anos)</h2>
-                        <canvas id="prematureMortalityChart"></canvas>
+                    <!-- Vigilância -->
+                    <div class="bg-white p-6 rounded-lg shadow-lg lg:col-span-2">
+                        <h3 class="text-lg font-bold mb-4">Vigilância: Doenças Notificadas (2022)</h3>
+                        <div class="chart-container" style="height: 250px;">
+                            <canvas id="vigilanciaChart"></canvas>
+                        </div>
                     </div>
-                    <div class="bg-gray-800 rounded-lg shadow-lg p-6">
-                        <h2 class="text-lg font-semibold text-white mb-4">Óbitos por Causas Externas (2022)</h2>
-                        <canvas id="externalDeathsChart"></canvas>
+                    <!-- Indicadores Adicionais -->
+                    <div class="bg-white p-6 rounded-lg shadow-lg flex flex-col justify-center text-center">
+                        <h3 class="text-lg font-bold mb-4">Indicadores Chave</h3>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div><h4 class="font-semibold text-gray-600">Mortalidade Infantil (2023)</h4><p class="text-2xl font-bold text-red-500">61</p><p class="text-sm">óbitos</p></div>
+                            <div><h4 class="font-semibold text-gray-600">Mortalidade Materna (2022)</h4><p class="text-2xl font-bold text-red-500">5</p><p class="text-sm">óbitos</p></div>
+                            <div><h4 class="font-semibold text-gray-600">Tuberculose (2022)</h4><p class="text-2xl font-bold text-orange-500">117</p><p class="text-sm">casos novos</p></div>
+                            <div><h4 class="font-semibold text-gray-600">Hanseníase (2022)</h4><p class="text-2xl font-bold text-orange-500">117</p><p class="text-sm">casos novos</p></div>
+                        </div>
                     </div>
-                    <div class="lg:col-span-2 bg-gray-800 rounded-lg shadow-lg p-6">
-                        <h2 class="text-lg font-semibold text-white mb-4">Internações por Infarto (IAM) vs. AVC</h2>
-                        <canvas id="iamAvcChart"></canvas>
+                    <!-- Extras -->
+                    <div class="bg-blue-50 border-l-4 border-blue-500 text-blue-800 p-4 rounded-lg shadow-lg lg:col-span-3">
+                        <h3 class="text-lg font-bold mb-2">Potencial do Dashboard</h3>
+                        <p>Este painel pode ser expandido com integrações de dados para incluir:</p>
+                        <ul class="list-disc list-inside mt-2 text-sm">
+                            <li><strong>Georreferenciamento:</strong> Mapas de calor por bairro para incidência de doenças e cobertura vacinal.</li>
+                            <li><strong>Metas vs. Realizado:</strong> Comparativos com pactuações regionais e séries históricas.</li>
+                            <li><strong>Alertas em Tempo Real:</strong> Notificações sobre surtos, baixa cobertura vacinal ou aumento em filas de espera.</li>
+                        </ul>
                     </div>
-                </section>
+                </div>
             </div>
-            
-            <!-- Aba: Doenças de Notificação -->
-            <div id="notificacao" class="tab-content hidden">
-                <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                     <div class="bg-gray-800 rounded-lg shadow-lg p-6">
-                        <h2 class="text-lg font-semibold text-white mb-4">Casos de Dengue vs. AIDS</h2>
-                        <canvas id="dengueAidsChart"></canvas>
-                    </div>
-                    <div class="bg-gray-800 rounded-lg shadow-lg p-6">
-                        <h2 class="text-lg font-semibold text-white mb-4">Casos de Hanseníase vs. Tuberculose</h2>
-                        <canvas id="hansenTuberChart"></canvas>
-                    </div>
-                </section>
-            </div>
+        </div>
+    </main>
 
-            <!-- Aba: Atenção Primária -->
-            <div id="atencaoPrimaria" class="tab-content hidden">
-                 <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                    <div class="bg-gray-800 rounded-lg shadow-lg p-6"><p class="text-sm font-medium text-gray-400">Cobertura Bolsa Família (Saúde)</p><p class="text-3xl font-bold text-white mt-2">71.6%</p><p class="text-sm text-gray-400 mt-1">2ª Vigência 2023</p></div>
-                    <div class="bg-gray-800 rounded-lg shadow-lg p-6"><p class="text-sm font-medium text-gray-400">Mamografias (2022)</p><p class="text-3xl font-bold text-white mt-2">2.981</p><p class="text-sm text-gray-400 mt-1">Total de exames</p></div>
-                    <div class="bg-gray-800 rounded-lg shadow-lg p-6"><p class="text-sm font-medium text-gray-400">Aleitamento Exclusivo</p><p class="text-3xl font-bold text-white mt-2">27.9%</p><p class="text-sm text-gray-400 mt-1">Crianças < 6 meses (2023)</p></div>
-                    <div class="bg-gray-800 rounded-lg shadow-lg p-6"><p class="text-sm font-medium text-gray-400">Casos de Oncologia (2022)</p><p class="text-3xl font-bold text-white mt-2">86</p><p class="text-sm text-gray-400 mt-1">Novos diagnósticos</p></div>
-                </section>
-                <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <div class="bg-gray-800 rounded-lg shadow-lg p-6">
-                        <h2 class="text-lg font-semibold text-white mb-4">Acompanhamento Saúde (Bolsa Família)</h2>
-                        <canvas id="bolsaFamiliaChart"></canvas>
-                    </div>
-                    <div class="bg-gray-800 rounded-lg shadow-lg p-6">
-                        <h2 class="text-lg font-semibold text-white mb-4">Mamografias por Faixa Etária (2022)</h2>
-                        <canvas id="mamografiaChart"></canvas>
-                    </div>
-                     <div class="lg:col-span-2 bg-gray-800 rounded-lg shadow-lg p-6">
-                        <h2 class="text-lg font-semibold text-white mb-4">Principais Causas de Internação em Idosos (2022)</h2>
-                        <canvas id="idososChart"></canvas>
-                    </div>
-                </section>
-            </div>
-        </main>
-    </div>
-
+    <!-- Bloco de Script para os gráficos e abas -->
     <script>
-        // --- LÓGICA DAS ABAS ---
-        const tabs = document.querySelectorAll('nav button');
-        const tabContents = document.querySelectorAll('.tab-content');
-        const charts = {}; // Objeto para armazenar instâncias de gráficos
-
-        function changeTab(event, tabId) {
-            tabContents.forEach(content => content.classList.add('hidden'));
-            tabs.forEach(tab => {
-                tab.classList.remove('tab-active');
-                tab.classList.add('tab-inactive');
-            });
-            document.getElementById(tabId).classList.remove('hidden');
-            event.currentTarget.classList.add('tab-active');
-            event.currentTarget.classList.remove('tab-inactive');
-        }
-
-        // --- DADOS E GRÁFICOS ---
-        Chart.defaults.color = '#a0aec0'; 
-        Chart.defaults.borderColor = 'rgba(255, 255, 255, 0.1)'; 
-        
-        const chartTooltip = { backgroundColor: '#1f2937', titleColor: '#f3f4f6', bodyColor: '#d1d5db' };
-        const chartLegend = { labels: { color: '#f3f4f6' } };
-
-        function createOrUpdateChart(id, type, data, options) {
-            if (charts[id]) {
-                charts[id].destroy();
-            }
-            charts[id] = new Chart(document.getElementById(id), { type, data, options });
-        }
-        
-        // --- INICIALIZAÇÃO DOS GRÁFICOS (CHAMADA ÚNICA) ---
-        document.addEventListener('DOMContentLoaded', () => {
-            // GRÁFICOS DA ABA: VISÃO GERAL
-            const mortalityCausesData = { labels: ['Causas Externas', 'Ap. Circulatório', 'Neoplasias', 'Doenças Infecciosas', 'Ap. Respiratório'], datasets: [{ label: 'Nº de Óbitos', data: [260, 216, 126, 115, 87], backgroundColor: ['#ef4444', '#f97316', '#8b5cf6', '#f59e0b', '#3b82f6'] }] };
-            createOrUpdateChart('mortalityCausesChart', 'bar', mortalityCausesData, { indexAxis: 'y', responsive: true, plugins: { legend: { display: false }, tooltip: chartTooltip }, scales: { y: { beginAtZero: true } } });
-
-            // GRÁFICOS DA ABA: SAÚDE MATERNO-INFANTIL
-            const birthsData = { labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'], datasets: [{ label: 'Nascidos Vivos', data: [425, 365, 429, 393, 439, 400, 396, 417, 419, 375, 385, 378], borderColor: '#3b82f6', backgroundColor: 'rgba(59, 130, 246, 0.1)', fill: true, tension: 0.4 }] };
-            createOrUpdateChart('birthsChart', 'line', birthsData, { responsive: true, plugins: { legend: { ...chartLegend, position: 'top' }, tooltip: chartTooltip }, scales: { y: { beginAtZero: false } } });
-            const infantDeathsData = { labels: ['Gestação', 'Parto', 'Recém-nascido', 'Diagnóstico/Trat.', 'Promoção à Saúde'], datasets: [{ label: 'Nº de Óbitos', data: [15, 2, 13, 5, 6], backgroundColor: ['#10b981', '#3b82f6', '#8b5cf6', '#f97316', '#f59e0b'], hoverOffset: 4 }] };
-            createOrUpdateChart('infantDeathsChart', 'doughnut', infantDeathsData, { responsive: true, plugins: { legend: { ...chartLegend, position: 'bottom' }, tooltip: chartTooltip } });
-            const maternalDeathsData = { labels: ['2017', '2018', '2019', '2020', '2021', '2022'], datasets: [{ label: 'Óbitos Maternos', data: [4, 1, 1, 6, 7, 5], borderColor: '#f59e0b', backgroundColor: 'rgba(245, 158, 11, 0.1)', fill: true, tension: 0.4 }] };
-            createOrUpdateChart('maternalDeathsChart', 'line', maternalDeathsData, { responsive: true, plugins: { legend: { display: false }, tooltip: chartTooltip }, scales: { y: { beginAtZero: true } } });
-            const anomaliesData = { labels: ['2017', '2018', '2019', '2020', '2021', '2022', '2023'], datasets: [{ label: 'Casos', data: [22, 24, 32, 25, 29, 12, 31], backgroundColor: '#8b5cf6' }] };
-            createOrUpdateChart('anomaliesChart', 'bar', anomaliesData, { responsive: true, plugins: { legend: { display: false }, tooltip: chartTooltip }, scales: { y: { beginAtZero: true } } });
-
-            // GRÁFICOS DA ABA: MORBIDADE
-            const hospitalizationCausesData = { labels: ['Gravidez e Parto', 'Ap. Digestivo', 'Causas Externas', 'Ap. Respiratório', 'Doenças Infecciosas'], datasets: [{ label: 'Nº de Internações', data: [1609, 1101, 1023, 906, 564], backgroundColor: ['#6366f1', '#a855f7', '#d946ef', '#ec4899', '#f43f5e'] }] };
-            createOrUpdateChart('hospitalizationCausesChart', 'bar', hospitalizationCausesData, { indexAxis: 'y', responsive: true, plugins: { legend: { display: false }, tooltip: chartTooltip }, scales: { y: { beginAtZero: true } } });
-            const hospitalizationByGenderData = { labels: ['Feminino', 'Masculino'], datasets: [{ label: 'Total de Internações', data: [6410, 3520], backgroundColor: ['#ec4899', '#3b82f6'], hoverOffset: 4 }] };
-            createOrUpdateChart('hospitalizationByGenderChart', 'pie', hospitalizationByGenderData, { responsive: true, plugins: { legend: { ...chartLegend, position: 'bottom' }, tooltip: chartTooltip } });
-
-            // GRÁFICOS DA ABA: MORTALIDADE
-            const prematureMortalityData = { labels: ['2017', '2018', '2019', '2020', '2021', '2022'], datasets: [{ label: 'Nº de Óbitos', data: [157, 143, 169, 162, 191, 229], borderColor: '#ef4444', backgroundColor: 'rgba(239, 68, 68, 0.1)', fill: true, tension: 0.4 }] };
-            createOrUpdateChart('prematureMortalityChart', 'line', prematureMortalityData, { responsive: true, plugins: { legend: { display: false }, tooltip: chartTooltip }, scales: { y: { beginAtZero: false } } });
-            const externalDeathsData = { labels: ['Agressões', 'Ac. Transporte', 'Outras Acidentais', 'Interv. Legais', 'Lesões Autoprovoc.'], datasets: [{ label: 'Nº de Óbitos', data: [103, 66, 46, 26, 13], backgroundColor: ['#dc2626', '#f97316', '#f59e0b', '#eab308', '#84cc16'], hoverOffset: 4 }] };
-            createOrUpdateChart('externalDeathsChart', 'pie', externalDeathsData, { responsive: true, plugins: { legend: { ...chartLegend, position: 'bottom' }, tooltip: chartTooltip } });
-            const iamAvcData = { labels: ['2017', '2018', '2019', '2020', '2021', '2022', '2023'], datasets: [{ label: 'Infarto (IAM)', data: [50, 62, 71, 73, 70, 96, 91], borderColor: '#ef4444', backgroundColor: 'rgba(239, 68, 68, 0.1)', fill: true, tension: 0.4 }, { label: 'AVC', data: [77, 97, 79, 80, 80, 55, 95], borderColor: '#3b82f6', backgroundColor: 'rgba(59, 130, 246, 0.1)', fill: true, tension: 0.4 }] };
-            createOrUpdateChart('iamAvcChart', 'line', iamAvcData, { responsive: true, plugins: { legend: { ...chartLegend, position: 'top' }, tooltip: chartTooltip }, scales: { y: { beginAtZero: true } } });
+        document.addEventListener('DOMContentLoaded', function () {
             
-            // GRÁFICOS DA ABA: DOENÇAS DE NOTIFICAÇÃO
-            const dengueAidsData = { labels: ['2017', '2018', '2019', '2020', '2021', '2022'], datasets: [{ label: 'Dengue', data: [1094, 255, 23, 12, 96, 1194], borderColor: '#f97316', tension: 0.4 }, { label: 'AIDS', data: [138, 126, 136, 105, 134, 172], borderColor: '#ef4444', tension: 0.4 }] };
-            createOrUpdateChart('dengueAidsChart', 'line', dengueAidsData, { responsive: true, plugins: { legend: { ...chartLegend, position: 'top' }, tooltip: chartTooltip }, scales: { y: { beginAtZero: true } } });
-            const hansenTuberData = { labels: ['2017', '2018', '2019', '2020', '2021', '2022'], datasets: [{ label: 'Hanseníase', data: [114, 148, 180, 95, 134, 117], backgroundColor: '#10b981' }, { label: 'Tuberculose', data: [61, 66, 98, 100, 109, 117], backgroundColor: '#0ea5e9' }] };
-            createOrUpdateChart('hansenTuberChart', 'bar', hansenTuberData, { responsive: true, plugins: { legend: { ...chartLegend, position: 'top' }, tooltip: chartTooltip }, scales: { y: { beginAtZero: true } } });
-        
-            // GRÁFICOS DA ABA: ATENÇÃO PRIMÁRIA
-            const bolsaFamiliaData = { labels: ['2018', '2019', '2020', '2021', '2022', '2023'], datasets: [{ label: '% de Acompanhados', data: [60.29, 60.94, 42.32, 60.59, 72.42, 71.56], borderColor: '#22c55e', backgroundColor: 'rgba(34, 197, 94, 0.1)', fill: true, tension: 0.4 }] };
-            createOrUpdateChart('bolsaFamiliaChart', 'line', bolsaFamiliaData, { responsive: true, plugins: { legend: { display: false }, tooltip: chartTooltip }, scales: { y: { beginAtZero: false, ticks: { callback: value => value + '%' } } } });
-            const mamografiaData = { labels: ['40-49 anos', '50-59 anos', '60-69 anos', '70+ anos'], datasets: [{ label: 'Nº de Exames', data: [805, 1382, 566, 70], backgroundColor: '#ec4899' }]};
-            createOrUpdateChart('mamografiaChart', 'bar', mamografiaData, { responsive: true, plugins: { legend: { display: false }, tooltip: chartTooltip }, scales: { y: { beginAtZero: true } } });
-            const idososData = { labels: ['Ap. Circulatório', 'Lesões/Envenenamentos', 'Ap. Digestivo', 'Doenças Infecciosas', 'Ap. Geniturinário'], datasets: [{ label: 'Nº de Internações', data: [316, 236, 172, 159, 155], backgroundColor: ['#f97316', '#ef4444', '#eab308', '#84cc16', '#0ea5e9'] }]};
-            createOrUpdateChart('idososChart', 'bar', idososData, { indexAxis: 'y', responsive: true, plugins: { legend: { display: false }, tooltip: chartTooltip }, scales: { y: { beginAtZero: true } } });
-        });
+            // Lógica para alternar abas
+            const tabs = document.querySelectorAll('.tab-link');
+            const tabContents = document.querySelectorAll('.tab-content');
 
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tabContents.forEach(c => c.classList.remove('active'));
+                    tab.classList.add('active');
+                    document.getElementById(tab.dataset.tab).classList.add('active');
+                });
+            });
+
+            // GRÁFICOS DA ABA: VISÃO GERAL
+            const piramideEtariaCtx = document.getElementById('piramideEtariaChart').getContext('2d');
+            new Chart(piramideEtariaCtx, { type: 'bar', data: { labels: ['0-4','5-9','10-14','15-19','20-24','25-29','30-34','35-39','40-44','45-49','50-54','55-59','60-64','65+'], datasets: [{ label: 'Homens', data: [-13388,-13441,-13391,-12984,-13379,-12980,-12984,-11910,-10046,-7815,-6082,-4561,-3341,-4900], backgroundColor: 'rgba(54, 162, 235, 0.8)' }, { label: 'Mulheres', data: [13033,12930,12673,13292,13686,14041,13745,12530,10563,8538,6636,5026,3060,4831], backgroundColor: 'rgba(255, 99, 132, 0.8)' }] }, options: { responsive: true, maintainAspectRatio: false, indexAxis: 'y', scales: { x: { ticks: { callback: value => Math.abs(value) }, stacked: true, title: { display: true, text: 'População' } }, y: { stacked: true, title: { display: true, text: 'Faixa Etária' } } }, plugins: { tooltip: { callbacks: { label: context => `${context.dataset.label}: ${Math.abs(context.raw)}` } }, legend: { position: 'top' } } } });
+            const nascidosVivosCtx = document.getElementById('nascidosVivosChart').getContext('2d');
+            new Chart(nascidosVivosCtx, { type: 'line', data: { labels: ['2017','2018','2019','2020','2021','2022','2023'], datasets: [{ label: 'Nascidos Vivos', data: [4582,4810,4577,4667,5087,5019,4821], backgroundColor: 'rgba(75, 192, 192, 0.2)', borderColor: 'rgba(75, 192, 192, 1)', borderWidth: 2, fill: true, tension: 0.3 }] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, title: { display: true, text: 'Número de Nascimentos' } } }, plugins: { legend: { display: false } } } });
+            const mortalidadeInfantilCtx = document.getElementById('mortalidadeInfantilChart').getContext('2d');
+            new Chart(mortalidadeInfantilCtx, { type: 'bar', data: { labels: ['2017','2018','2019','2020','2021','2022','2023'], datasets: [{ label: 'Óbitos Infantis', data: [63,51,57,55,73,58,61], backgroundColor: 'rgba(255, 99, 132, 0.6)' }] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, title: { display: true, text: 'Número de Óbitos' } } }, plugins: { legend: { display: false } } } });
+            const obitosMaternosCtx = document.getElementById('obitosMaternosChart').getContext('2d');
+            new Chart(obitosMaternosCtx, { type: 'bar', data: { labels: ['2017','2018','2019','2020','2021','2022','2023'], datasets: [{ label: 'Óbitos Maternos', data: [4,1,1,6,7,5,0], backgroundColor: 'rgba(153, 102, 255, 0.6)' }] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 }, title: { display: true, text: 'Número de Óbitos' } } }, plugins: { legend: { display: false } } } });
+            const internacoesCtx = document.getElementById('internacoesChart').getContext('2d');
+            new Chart(internacoesCtx, { type: 'bar', data: { labels: ['Gravidez, parto e puerpério','Lesões e envenenamentos','Doenças do aparelho digestivo','Doenças do aparelho respiratório','Doenças infecciosas'], datasets: [{ label: 'Nº de Internações em 2022', data: [2297,1039,1007,856,564], backgroundColor: 'rgba(255, 159, 64, 0.7)' }] }, options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, title: { display: true, text: 'Fonte: SIH/SUS - Dados de 2022' } } } });
+            const mortalidadeGeralCtx = document.getElementById('mortalidadeGeralChart').getContext('2d');
+            new Chart(mortalidadeGeralCtx, { type: 'bar', data: { labels: ['Causas externas (violência/acidentes)','Doenças do aparelho circulatório','Neoplasias (tumores)','Doenças infecciosas','Doenças do aparelho respiratório'], datasets: [{ label: 'Nº de Óbitos em 2022', data: [260,216,126,115,87], backgroundColor: 'rgba(215, 50, 50, 0.7)' }] }, options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, title: { display: true, text: 'Fonte: SIM - Dados de 2022' } } } });
+            
+            // GRÁFICO DA ABA: ATENÇÃO PRIMÁRIA
+            const previneBrasilCtx = document.getElementById('previneBrasilChart').getContext('2d');
+            new Chart(previneBrasilCtx, {
+                type: 'bar',
+                data: {
+                    labels: [ 'Consultas pré-natal (mín. 6)', 'Exames sífilis/HIV em gestantes', 'Atendimento odontológico em gestantes', 'Exame citopatológico', 'Vacina (Pólio e Penta)', 'PA aferida (Hipertensos)', 'Hemoglobina glicada (Diabéticos)' ],
+                    datasets: [{ label: 'Resultado (%)', data: [48.8, 49.3, 31.9, 13.9, 68.3, 18.7, 26.6], backgroundColor: 'rgba(54, 162, 235, 0.7)' }, { label: 'Meta (%)', data: [60, 60, 60, 40, 95, 50, 50], backgroundColor: 'rgba(255, 99, 132, 0.7)' }]
+                },
+                options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, scales: { x: { beginAtZero: true, max: 100 } }, plugins: { legend: { position: 'top' } } }
+            });
+
+            const vacinacaoEscolarCtx = document.getElementById('vacinacaoEscolarChart').getContext('2d');
+            new Chart(vacinacaoEscolarCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set'],
+                    datasets: [{ label: 'Doses Aplicadas', data: [0, 4, 7, 78, 542, 126, 11, 15, 6], backgroundColor: 'rgba(34, 197, 94, 0.7)' }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, title: { display: true, text: 'Número de Doses' } } }, plugins: { legend: { display: false } } }
+            });
+
+            const duplaViralCtx = document.getElementById('duplaViralChart').getContext('2d');
+            const coberturaDuplaViral = (499 / 2300) * 100;
+            new Chart(duplaViralCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Cobertura Vacinal (%)'],
+                    datasets: [
+                        { label: 'Cobertura Atingida', data: [coberturaDuplaViral], backgroundColor: 'rgba(59, 130, 246, 0.7)', barPercentage: 0.5 },
+                        { label: 'Meta Restante', data: [100 - coberturaDuplaViral], backgroundColor: 'rgba(229, 231, 235, 0.7)', barPercentage: 0.5 }
+                    ]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true, maintainAspectRatio: false,
+                    scales: { x: { stacked: true, max: 100, ticks: { callback: value => value + "%" } }, y: { stacked: true } },
+                    plugins: { 
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) { label += ': '; }
+                                    if (context.parsed.x !== null) { label += context.parsed.x.toFixed(2) + '%'; }
+                                    return label;
+                                }
+                            }
+                        },
+                        title: { display: true, text: `Cobertura: ${coberturaDuplaViral.toFixed(2)}%` }
+                    }
+                }
+            });
+
+
+            // GRÁFICOS DA ABA: ATENÇÃO ESPECIALIZADA
+            const producaoAmbulatorialCtx = document.getElementById('producaoAmbulatorialChart').getContext('2d');
+            new Chart(producaoAmbulatorialCtx, { type: 'bar', data: { labels: ['Consultas Médicas', 'Fisioterapia', 'Fonoaudiologia', 'Psicologia', 'Terapia Ocupacional'], datasets: [{ label: 'Nº de Atendimentos', data: [55270, 66734, 14357, 22298, 17049], backgroundColor: 'rgba(75, 192, 192, 0.7)' }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } } });
+            const procedimentosExamesCtx = document.getElementById('procedimentosExamesChart').getContext('2d');
+            new Chart(procedimentosExamesCtx, { type: 'bar', data: { labels: ['Raio-X', 'Ultrassonografia', 'Tomografia', 'Mamografia'], datasets: [{ label: 'Nº de Exames', data: [111855, 58954, 15221, 2981], backgroundColor: 'rgba(255, 159, 64, 0.7)' }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } } });
+            const causasExternasCtx = document.getElementById('causasExternasChart').getContext('2d');
+            new Chart(causasExternasCtx, { type: 'bar', data: { labels: ['Agressões', 'Acidentes de Transporte', 'Outras Lesões Acidentais', 'Intervenções Legais', 'Lesões Autoprovocadas'], datasets: [{ label: 'Nº de Óbitos em 2022', data: [103, 66, 46, 26, 13], backgroundColor: 'rgba(239, 68, 68, 0.7)' }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } } });
+
+            // GRÁFICOS DA ABA: REDES / INTEGRAÇÃO
+            const atendimentosCapsCtx = document.getElementById('atendimentosCapsChart').getContext('2d');
+            new Chart(atendimentosCapsCtx, { type: 'doughnut', data: { labels: ['CAPS II', 'CAPS i', 'CAPS AD'], datasets: [{ data: [15311, 11260, 6423], backgroundColor: ['rgba(139, 92, 246, 0.8)', 'rgba(96, 165, 250, 0.8)', 'rgba(52, 211, 153, 0.8)'] }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } } });
+            const saudeMentalCtx = document.getElementById('saudeMentalChart').getContext('2d');
+            new Chart(saudeMentalCtx, { type: 'line', data: { labels: ['2017', '2018', '2019', '2020', '2021', '2022', '2023'], datasets: [{ label: 'Internações por Transtornos Mentais', data: [239, 164, 137, 194, 221, 373, 376], borderColor: 'rgba(139, 92, 246, 1)', tension: 0.1, fill: false }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: false, title: {display: true, text: 'Nº de Internações'} } } } });
+            const tipoPartoCtx = document.getElementById('tipoPartoChart').getContext('2d');
+            new Chart(tipoPartoCtx, { type: 'doughnut', data: { labels: ['Parto Vaginal', 'Parto Cesáreo'], datasets: [{ data: [2891, 2196], backgroundColor: ['rgba(34, 197, 94, 0.8)', 'rgba(249, 115, 22, 0.8)'] }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } } });
+            const vigilanciaCtx = document.getElementById('vigilanciaChart').getContext('2d');
+            new Chart(vigilanciaCtx, { type: 'bar', data: { labels: ['Dengue', 'Hanseníase', 'Tuberculose', 'Chikungunya'], datasets: [{ label: 'Casos Notificados em 2022', data: [1194, 117, 117, 10], backgroundColor: 'rgba(245, 158, 11, 0.8)' }] }, options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } } });
+            
+            const saudeBucalBasicoCtx = document.getElementById('saudeBucalBasicoChart').getContext('2d');
+            new Chart(saudeBucalBasicoCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Exame bucal', 'Atividade coletiva', 'Aplicação de flúor', 'Restauração', 'Raspagem'],
+                    datasets: [{ label: 'Nº de Procedimentos', data: [70862, 58187, 49634, 21328, 18327], backgroundColor: 'rgba(54, 162, 235, 0.7)' }]
+                },
+                options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { ticks: { beginAtZero: true } } } }
+            });
+
+            const saudeBucalEspecializadoCtx = document.getElementById('saudeBucalEspecializadoChart').getContext('2d');
+            new Chart(saudeBucalEspecializadoCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Endodontia', 'Periodontia', 'Cirurgia oral', 'Prótese', 'Estomatologia'],
+                    datasets: [{ label: 'Nº de Procedimentos', data: [3744, 952, 899, 742, 102], backgroundColor: 'rgba(255, 159, 64, 0.7)' }]
+                },
+                options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { ticks: { beginAtZero: true } } } }
+            });
+        });
     </script>
 </body>
 </html>
-
 
